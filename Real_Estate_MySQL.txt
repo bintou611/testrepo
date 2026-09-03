@@ -1,0 +1,138 @@
+-- MySQL Script for Real Estate Company Database
+
+-- Drop tables if they exist to start fresh
+DROP TABLE IF EXISTS Transactions;
+DROP TABLE IF EXISTS Appointments;
+DROP TABLE IF EXISTS Properties;
+DROP TABLE IF EXISTS Clients;
+DROP TABLE IF EXISTS Agents;
+DROP TABLE IF EXISTS Offices;
+
+-- Create Offices Table
+CREATE TABLE Offices (
+    OfficeID INT PRIMARY KEY AUTO_INCREMENT,
+    OfficeName VARCHAR(100) NOT NULL,
+    Address VARCHAR(255) NOT NULL,
+    City VARCHAR(100) NOT NULL,
+    State VARCHAR(50) NOT NULL,
+    ZipCode VARCHAR(10) NOT NULL,
+    PhoneNumber varchar(10) UNIQUE NOT NULL
+);
+
+-- Create Agents Table
+CREATE TABLE Agents (
+    AgentID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    PhoneNumber varchar(10) UNIQUE NOT NULL,
+    HireDate DATE NOT NULL,
+    OfficeID INT,
+    FOREIGN KEY (OfficeID) REFERENCES Offices(OfficeID)
+);
+
+-- Create Clients Table
+CREATE TABLE Clients (
+    ClientID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    PhoneNumber varchar(10) UNIQUE NOT NULL,
+    PreferredContactMethod VARCHAR(50)
+);
+
+-- Create Properties Table
+CREATE TABLE Properties (
+    PropertyID INT PRIMARY KEY AUTO_INCREMENT,
+    Address VARCHAR(255) NOT NULL,
+    City VARCHAR(100) NOT NULL,
+    State VARCHAR(50) NOT NULL,
+    ZipCode VARCHAR(10) NOT NULL,
+    ListPrice DECIMAL(12, 2) NOT NULL,
+    ListDate DATE NOT NULL,
+    Status VARCHAR(20) NOT NULL,
+    Bedrooms INT,
+    Bathrooms DECIMAL(3, 1),
+    SquareFootage INT,
+    AgentID INT,
+    SellerClientID INT,
+    FOREIGN KEY (AgentID) REFERENCES Agents(AgentID),
+    FOREIGN KEY (SellerClientID) REFERENCES Clients(ClientID)
+);
+
+-- Create Appointments Table
+CREATE TABLE Appointments (
+    AppointmentID INT PRIMARY KEY AUTO_INCREMENT,
+    ClientID INT,
+    AgentID INT,
+    PropertyID INT,
+    AppointmentDate DATETIME NOT NULL,
+    Notes TEXT,
+    FOREIGN KEY (ClientID) REFERENCES Clients(ClientID),
+    FOREIGN KEY (AgentID) REFERENCES Agents(AgentID),
+    FOREIGN KEY (PropertyID) REFERENCES Properties(PropertyID)
+);
+
+-- Create Transactions Table
+CREATE TABLE Transactions (
+    TransactionID INT PRIMARY KEY AUTO_INCREMENT,
+    PropertyID INT,
+    BuyerClientID INT,
+    SellerClientID INT,
+    AgentID INT,
+    SaleDate DATE NOT NULL,
+    SalePrice DECIMAL(12, 2) NOT NULL,
+    Commission DECIMAL(10, 2),
+    FOREIGN KEY (PropertyID) REFERENCES Properties(PropertyID),
+    FOREIGN KEY (BuyerClientID) REFERENCES Clients(ClientID),
+    FOREIGN KEY (SellerClientID) REFERENCES Clients(ClientID),
+    FOREIGN KEY (AgentID) REFERENCES Agents(AgentID)
+);
+
+-- Insert Sample Data
+
+-- Offices
+INSERT INTO Offices (OfficeID, OfficeName, Address, City, State, ZipCode, PhoneNumber) VALUES
+(1, 'Downtown Realty', '123 Main St', 'Maplewood', 'CA', '90210', '5105550101'),
+(2, 'Lakeside Properties', '456 Lakeview Dr', 'Springfield', 'IL', '62704', '2175550102'),
+(3, 'Bricks Realty', '101 Charlotetown Ave.', 'Charlotte', 'NC', '28235', '7045550102');
+
+-- Agents
+INSERT INTO Agents (AgentID, FirstName, LastName, Email, PhoneNumber, HireDate, OfficeID) VALUES
+(1, 'Jane', 'Doe', 'jane.doe@email.com', '5105550201', '2020-03-15', 1),
+(2, 'John', 'Smith', 'john.smith@email.com', '2175550202', '2018-07-22', 1),
+(3, 'Emily', 'Jones', 'emily.jones@email.com', '2175550203', '2021-11-01', 2);
+-- This record will be created by students.
+-- (4, 'YourFirstName', 'YourLastName', 'anyname@anyemail.com', '7045550203', current_date, 3);
+
+-- Clients
+INSERT INTO Clients (ClientID, FirstName, LastName, Email, PhoneNumber, PreferredContactMethod) VALUES
+(1, 'Michael', 'Brown', 'michael.b@email.com', '9805550301', 'Email'),
+(2, 'Sarah', 'Davis', 'sarah.d@email.com', '5105550302', 'Phone'),
+(3, 'David', 'Miller', 'david.m@email.com', '7855550303', 'Text'),
+(4, 'Jessica', 'Wilson', 'jessica.w@email.com', '7045550304', 'Email'),
+(5, 'Ann', 'Aksut', 'anymailclient@email.com', '7045550314', 'Email');
+
+-- Properties
+INSERT INTO Properties (PropertyID, Address, City, State, ZipCode, ListPrice, ListDate, Status, Bedrooms, Bathrooms, SquareFootage, AgentID, SellerClientID) VALUES
+(1, '789 Oak Ave', 'Maplewood', 'CA', '90210', 650000.00, '2023-05-20', 'For Sale', 3, 2.5, 1800, 1, 3),
+(2, '101 Pine Ln', 'Maplewood', 'CA', '90210', 820000.00, '2023-06-10', 'Sold', 4, 3.0, 2400, 2, 4),
+(3, '212 Birch Rd', 'Springfield', 'IL', '62704', 375000.00, '2023-07-01', 'For Sale', 3, 2.0, 1650, 3, 2),
+(4, '100 Main Str', 'Charlotte', 'NC', '28210', 425000.00, current_date, 'For Sale', 4, 2.5, 1850, 1, 1),
+(5, '222 Twin Circle Rd', 'Charlotte', 'NC', '28277', 513000.00, current_date, 'For Sale', 4, 3.5, 2050, 1, 5),
+(6, '3060 English Bird Lane', 'Charlotte', 'NC', '28226', 782000.00, current_date, 'Under Contract', 3, 3.0, 1983, 1, 2);
+
+-- Appointments
+INSERT INTO Appointments (AppointmentID, ClientID, AgentID, PropertyID, AppointmentDate, Notes) VALUES
+(1, 1, 1, 1, '2023-05-25 14:00:00', 'Client very interested in the kitchen.'),
+(2, 2, 3, 3, '2023-07-05 11:00:00', 'Second viewing requested.'),
+(3, 5, 1, 4, current_date, 'Third viewing requested.');
+-- This record will be created by students.
+-- (4, 1, 4, 3, current_date, NULL);
+
+
+-- Transactions
+INSERT INTO Transactions (TransactionID, PropertyID, BuyerClientID, SellerClientID, AgentID, SaleDate, SalePrice, Commission) VALUES
+(1, 2, 1, 4, 2, '2023-08-15', 810000.00, 48600.00),
+(2, 6, 5, 2, 1, current_date, 780000.00, 35000.00);
+
